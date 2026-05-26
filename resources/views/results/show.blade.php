@@ -41,7 +41,7 @@
 <div class="space-y-6">
 
     <div class="bg-gradient-to-r from-indigo-600 to-blue-500 rounded-2xl shadow-lg p-8 text-white">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div>
                 <h1 class="text-3xl font-bold">Screening Result</h1>
                 <p class="mt-2 text-indigo-100">
@@ -49,10 +49,26 @@
                 </p>
             </div>
 
-            <a href="{{ route('results.index') }}"
-               class="bg-white text-indigo-700 px-5 py-3 rounded-xl font-semibold shadow-md hover:bg-indigo-50 transition">
-                Back to Results
-            </a>
+            <div class="flex items-center gap-3">
+    
+                <a href="{{ route('results.index') }}"
+                class="inline-flex items-center gap-2 bg-white text-indigo-700 px-5 py-3 rounded-xl font-semibold shadow-md hover:bg-indigo-50 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+                </svg>
+                    Back to Results
+                </a>
+
+                <a href="{{ route('results.pdf', $journal->id) }}"
+                class="inline-flex items-center gap-2 bg-white text-indigo-700 px-5 py-3 rounded-xl font-semibold shadow-md hover:bg-indigo-50 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
+                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+                <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>
+                </svg>
+                    Export PDF
+                </a>
+
+            </div>
         </div>
     </div>
 

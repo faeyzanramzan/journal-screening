@@ -47,4 +47,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class);
     }
+
+    public function journals()
+    {
+        return $this->hasMany(Journal::class);
+    }
 }

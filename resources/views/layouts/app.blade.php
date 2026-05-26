@@ -94,21 +94,6 @@
                     </span>
                 </a>
 
-                <!-- Reports -->
-                <a href="#"
-                class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-white/10">
-
-                    <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-bar-graph-fill" viewBox="0 0 16 16">
-                        <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1m.5 10v-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5m-2.5.5a.5.5 0 0 1-.5-.5v-4a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5zm-3 0a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5z"/>
-                        </svg>
-                    </div>
-
-                    <span class="text-sm font-medium">
-                        Reports
-                    </span>
-                </a>
-
                 <!-- ADMIN ONLY -->
                 @if(Auth::user()->role && Auth::user()->role->slug === 'admin')
 
@@ -117,6 +102,64 @@
                         <p class="text-xs uppercase tracking-wider text-blue-200 font-semibold px-2">
                             Administration
                         </p>
+                    </div>
+
+                    <!-- Reports -->
+                    <div x-data="{ openManagement: {{ request()->routeIs('reports.*') ? 'true' : 'false' }} }">
+
+                        <button type="button"
+                            @click="openManagement = !openManagement"
+                            class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-white/10">
+
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-text-fill" viewBox="0 0 16 16">
+                                    <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M4.5 9a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1zM4 10.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 1 0-1h4a.5.5 0 0 1 0 1z"/>
+                                    </svg>
+                                </div>
+
+                                <span class="text-sm font-medium">
+                                    Reports
+                                </span>
+                            </div>
+
+                            <span class="text-xs" x-text="openManagement ? '▲' : '▼'"></span>
+                        </button>
+
+                        <div x-show="openManagement" x-cloak class="mt-2 ml-11 space-y-1">
+                            <a href="{{ route('reports.index') }}"
+                            class="block px-4 py-2 rounded-lg text-sm transition
+                            {{ request()->routeIs('reports.index') ? 'bg-white/20 text-white' : 'text-blue-100 hover:bg-white/10' }}">
+                                Screening Summary Report
+                            </a>
+
+                            <a href="{{ route('reports.country') }}"
+                            class="block px-4 py-2 rounded-lg text-sm transition
+                            {{ request()->routeIs('reports.country') ? 'bg-white/20 text-white' : 'text-blue-100 hover:bg-white/10' }}">
+                                View Country Analysis
+                            </a>
+
+                            <a href="{{ route('reports.trend') }}"
+                            class="block px-4 py-2 rounded-lg text-sm transition
+                            {{ request()->routeIs('reports.trend') ? 'bg-white/20 text-white' : 'text-blue-100 hover:bg-white/10' }}">
+                                View Screening Trend
+                            </a>
+
+                            <a href="{{ route('reports.risk') }}"
+                            class="block px-4 py-2 rounded-lg text-sm transition
+                            {{ request()->routeIs('reports.risk') ? 'bg-white/20 text-white' : 'text-blue-100 hover:bg-white/10' }}">
+                                Risk Distribution
+                            </a>
+
+                            @if(Auth::user()->role && Auth::user()->role->slug === 'admin')
+                                <a href="{{ route('reports.user-activity') }}"
+                                class="block px-4 py-2 rounded-lg text-sm transition
+                                {{ request()->routeIs('reports.user-activity') ? 'bg-white/20 text-white' : 'text-blue-100 hover:bg-white/10' }}">
+                                    User Activity
+                                </a>
+                            @endif
+                        </div>
+
                     </div>
 
                     <!-- Management -->
@@ -144,22 +187,20 @@
                     <div x-show="openManagement" x-cloak class="mt-2 ml-11 space-y-1">
                         <a href="{{ route('countries.index') }}"
                         class="block px-4 py-2 rounded-lg text-sm transition
-                        {{ request()->routeIs('countries.*') ? 'bg-white/20 text-white' : 'text-blue-100 hover:bg-white/10' }}">
+                        {{ request()->routeIs('countries.index') ? 'bg-white/20 text-white' : 'text-blue-100 hover:bg-white/10' }}">
                             Country
                         </a>
 
-                        <a href="#"
-                        class="block px-4 py-2 rounded-lg text-sm text-blue-100 hover:bg-white/10 transition">
+                        <a href="{{ route('users.index') }}"
+                        class="block px-4 py-2 rounded-lg text-sm transition
+                        {{ request()->routeIs('users.*') ? 'bg-white/20 text-white' : 'text-blue-100 hover:bg-white/10' }}">
                             User Management
-                        </a>
-
-                        <a href="#"
-                        class="block px-4 py-2 rounded-lg text-sm text-blue-100 hover:bg-white/10 transition">
-                            Other Setup
                         </a>
                     </div>
 
                 </div>
+
+                
                    
 
                 @endif

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Journal;
 use App\Models\JournalMark;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 
 class ScreeningController extends Controller
 {
@@ -114,6 +116,8 @@ class ScreeningController extends Controller
             'publisher' => $request->publisher,
             'issn' => $request->issn,
             'country_id' => $request->country_id,
+
+            'user_id' => auth()->id(),
         ]);
 
         JournalMark::create([
@@ -214,5 +218,232 @@ class ScreeningController extends Controller
         $marks = \App\Models\JournalMark::where('journal_id', $journal->id)->first();
 
         return view('results.show', compact('journal', 'marks'));
+    }
+
+    public function reports()
+    {
+        $journals = \App\Models\Journal::latest()->get();
+
+        $totalScreened = $journals->count();
+        $legitimate = 0;
+        $questionable = 0;
+        $predatory = 0;
+        $totalScore = 0;
+        $scoredCount = 0;
+
+        foreach ($journals as $journal) {
+            $marks = \App\Models\JournalMark::where('journal_id', $journal->id)->first();
+
+            if (!$marks) {
+                continue;
+            }
+
+            $total =
+                ($marks->section_2a ?? 0) +
+                ($marks->section_2b ?? 0) +
+                ($marks->section_2c ?? 0) +
+                ($marks->section_2d ?? 0) +
+                ($marks->section_2e ?? 0) +
+                ($marks->section_3a ?? 0) +
+                ($marks->section_3b ?? 0) +
+                ($marks->section_3c ?? 0) +
+                ($marks->section_3d ?? 0) +
+                ($marks->section_4a ?? 0) +
+                ($marks->section_4b ?? 0);
+
+            $average = round($total / 11, 1);
+
+            $totalScore += $average;
+            $scoredCount++;
+
+            if ($average >= 8) {
+                $legitimate++;
+            } elseif ($average >= 5) {
+                $questionable++;
+            } else {
+                $predatory++;
+            }
+        }
+
+        $overallAverage = $scoredCount > 0 ? round($totalScore / $scoredCount, 1) : 0;
+
+        return view('reports.index', compact(
+            'totalScreened',
+            'legitimate',
+            'questionable',
+            'predatory',
+            'overallAverage'
+        ));
+    }
+
+    public function countryReport()
+    {
+        $countries = \App\Models\Country::with('journals')->orderBy('name')->get();
+
+        $countryReports = [];
+
+        foreach ($countries as $country) {
+            $total = 0;
+            $legitimate = 0;
+            $questionable = 0;
+            $predatory = 0;
+
+            foreach ($country->journals as $journal) {
+                $marks = \App\Models\JournalMark::where('journal_id', $journal->id)->first();
+
+                if (!$marks) {
+                    continue;
+                }
+
+                $score =
+                    ($marks->section_2a ?? 0) +
+                    ($marks->section_2b ?? 0) +
+                    ($marks->section_2c ?? 0) +
+                    ($marks->section_2d ?? 0) +
+                    ($marks->section_2e ?? 0) +
+                    ($marks->section_3a ?? 0) +
+                    ($marks->section_3b ?? 0) +
+                    ($marks->section_3c ?? 0) +
+                    ($marks->section_3d ?? 0) +
+                    ($marks->section_4a ?? 0) +
+                    ($marks->section_4b ?? 0);
+
+                $average = round($score / 11, 1);
+
+                $total++;
+
+                if ($average >= 8) {
+                    $legitimate++;
+                } elseif ($average >= 5) {
+                    $questionable++;
+                } else {
+                    $predatory++;
+                }
+            }
+
+            if ($total > 0) {
+                $countryReports[] = [
+                    'country' => $country->name,
+                    'total' => $total,
+                    'legitimate' => $legitimate,
+                    'questionable' => $questionable,
+                    'predatory' => $predatory,
+                ];
+            }
+        }
+
+        return view('reports.country', compact('countryReports'));
+    }
+
+    public function trendReport()
+    {
+        $monthlyData = \App\Models\Journal::selectRaw('MONTH(created_at) as month, YEAR(created_at) as year, COUNT(*) as total')
+            ->groupBy('year', 'month')
+            ->orderBy('year')
+            ->orderBy('month')
+            ->get();
+
+        return view('reports.trend', compact('monthlyData'));
+    }
+
+    public function trendMonth($year, $month)
+    {
+        $journals = \App\Models\Journal::with('country')
+            ->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->latest()
+            ->get();
+
+        $monthName = \DateTime::createFromFormat('!m', $month)->format('F');
+
+        return view('reports.trend-month', compact('journals', 'year', 'month', 'monthName'));
+    }
+
+    public function riskDistribution()
+    {
+        $journals = \App\Models\Journal::all();
+
+        $legitimate = 0;
+        $questionable = 0;
+        $predatory = 0;
+
+        foreach ($journals as $journal) {
+
+            $marks = \App\Models\JournalMark::where('journal_id', $journal->id)->first();
+
+            if (!$marks) {
+                continue;
+            }
+
+            $total =
+                ($marks->section_2a ?? 0) +
+                ($marks->section_2b ?? 0) +
+                ($marks->section_2c ?? 0) +
+                ($marks->section_2d ?? 0) +
+                ($marks->section_2e ?? 0) +
+                ($marks->section_3a ?? 0) +
+                ($marks->section_3b ?? 0) +
+                ($marks->section_3c ?? 0) +
+                ($marks->section_3d ?? 0) +
+                ($marks->section_4a ?? 0) +
+                ($marks->section_4b ?? 0);
+
+            $average = round($total / 11, 1);
+
+            if ($average >= 8) {
+
+                $predatory++;
+
+            } elseif ($average >= 5) {
+
+                $questionable++;
+
+            } else {
+
+                $legitimate++;
+
+            }
+        }
+
+        $totalData = max(($legitimate + $questionable + $predatory), 1);
+
+        return view('reports.risk', compact(
+            'legitimate',
+            'questionable',
+            'predatory',
+            'totalData'
+        ));
+    }
+
+    public function userActivity()
+    {
+        $users = \App\Models\User::withCount('journals')
+            ->with('role')
+            ->latest()
+            ->get();
+
+        return view('reports.user-activity', compact('users'));
+    }
+
+    public function userActivityShow(\App\Models\User $user)
+    {
+        $journals = \App\Models\Journal::with('country')
+            ->where('user_id', $user->id)
+            ->latest()
+            ->get();
+
+        return view('reports.user-activity-show', compact('user', 'journals'));
+    }
+
+    public function exportPdf(Journal $journal)
+    {
+        $journal->load('country');
+
+        $marks = JournalMark::where('journal_id', $journal->id)->first();
+
+        $pdf = Pdf::loadView('results.pdf', compact('journal', 'marks'))
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->download('journal-screening-result-' . $journal->id . '.pdf');
     }
 }
