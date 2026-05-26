@@ -94,21 +94,13 @@
                     </span>
                 </a>
 
-                <!-- ADMIN ONLY -->
-                @if(Auth::user()->role && Auth::user()->role->slug === 'admin')
-
-                    <!-- Divider -->
-                    <div class="pt-4 pb-2">
-                        <p class="text-xs uppercase tracking-wider text-blue-200 font-semibold px-2">
-                            Administration
-                        </p>
-                    </div>
+               
 
                     <!-- Reports -->
-                    <div x-data="{ openManagement: {{ request()->routeIs('reports.*') ? 'true' : 'false' }} }">
+                    <div x-data="{ openReport: {{ request()->routeIs('reports.*') ? 'true' : 'false' }} }">
 
                         <button type="button"
-                            @click="openManagement = !openManagement"
+                            @click="openReport = !openReport"
                             class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-white/10">
 
                             <div class="flex items-center gap-3">
@@ -123,10 +115,10 @@
                                 </span>
                             </div>
 
-                            <span class="text-xs" x-text="openManagement ? '▲' : '▼'"></span>
+                            <span class="text-xs" x-text="openReport ? '▲' : '▼'"></span>
                         </button>
 
-                        <div x-show="openManagement" x-cloak class="mt-2 ml-11 space-y-1">
+                        <div x-show="openReport" x-cloak class="mt-2 ml-11 space-y-1">
                             <a href="{{ route('reports.index') }}"
                             class="block px-4 py-2 rounded-lg text-sm transition
                             {{ request()->routeIs('reports.index') ? 'bg-white/20 text-white' : 'text-blue-100 hover:bg-white/10' }}">
@@ -151,15 +143,18 @@
                                 Risk Distribution
                             </a>
 
-                            @if(Auth::user()->role && Auth::user()->role->slug === 'admin')
-                                <a href="{{ route('reports.user-activity') }}"
-                                class="block px-4 py-2 rounded-lg text-sm transition
-                                {{ request()->routeIs('reports.user-activity') ? 'bg-white/20 text-white' : 'text-blue-100 hover:bg-white/10' }}">
-                                    User Activity
-                                </a>
-                            @endif
                         </div>
 
+                    </div>
+
+                     <!-- ADMIN ONLY -->
+                @if(Auth::user()->role && Auth::user()->role->slug === 'admin')
+
+                    <!-- Divider -->
+                    <div class="pt-4 pb-2">
+                        <p class="text-xs uppercase tracking-wider text-blue-200 font-semibold px-2">
+                            Administration
+                        </p>
                     </div>
 
                     <!-- Management -->
@@ -195,6 +190,12 @@
                         class="block px-4 py-2 rounded-lg text-sm transition
                         {{ request()->routeIs('users.*') ? 'bg-white/20 text-white' : 'text-blue-100 hover:bg-white/10' }}">
                             User Management
+                        </a>
+
+                         <a href="{{ route('reports.user-activity') }}"
+                        class="block px-4 py-2 rounded-lg text-sm transition
+                        {{ request()->routeIs('reports.user-activity') ? 'bg-white/20 text-white' : 'text-blue-100 hover:bg-white/10' }}">
+                            User Activity
                         </a>
                     </div>
 
