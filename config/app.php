@@ -15,7 +15,7 @@ return [
     | any other location as required by the application or its packages.
     |
     */
-
+    'force_https' => env('FORCE_HTTPS', false),
     'name' => env('APP_NAME', 'Laravel'),
 
     /*

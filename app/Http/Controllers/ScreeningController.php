@@ -392,15 +392,15 @@ class ScreeningController extends Controller
 
             if ($average >= 8) {
 
-                $predatory++;
-
+                $legitimate++;
+                
             } elseif ($average >= 5) {
 
                 $questionable++;
 
             } else {
 
-                $legitimate++;
+                $predatory++;
 
             }
         }
